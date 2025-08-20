@@ -1,0 +1,8 @@
+
+
+
+main: function void () = {
+    print("hola mundo");
+    print("hola\nmundo);
+    print("hola\nmundo\n");
+}

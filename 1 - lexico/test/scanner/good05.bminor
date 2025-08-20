@@ -1,0 +1,12 @@
+// es par
+
+ispar: function boolean ( n: integer ) = {
+    if( n == 0 ) {
+        return true;
+    }
+    return false;
+}
+
+main: function void () = {
+    print(ispar(10));
+}

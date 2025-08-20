@@ -1,5 +1,5 @@
 
 
 main: function void () = {
-    a: integer = 123;`
-}
+    a: integer = 12;
+}#

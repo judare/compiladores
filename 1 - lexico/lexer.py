@@ -10,7 +10,7 @@ class Lexer(sly.Lexer):
         ARRAY, AUTO, BOOLEAN, CHAR, ELSE, FALSE, FLOAT, FOR, FUNCTION,
         IF, INTEGER, PRINT, RETURN, STRING, TRUE, VOID, WHILE,
         # Literales
-        INT_LIT, FLOAT_LIT, CHAR_LIT, STRING_LIT,
+         FLOAT_LIT, CHAR_LIT, STRING_LIT, INT_LIT,
         # Operadores multi-char
         LE, GE, EQ, NEQ, AND, OR, INC, DEC, NOT,
         # Otros
@@ -44,8 +44,10 @@ class Lexer(sly.Lexer):
     # -------------------
     # Identificadores y palabras clave
     # -------------------
-    ID = r'[_a-zA-Z]\w*'
 
+
+
+    ID = r"[a-zA-Z_][a-zA-Z0-9_]*"
     ID['array']    = ARRAY
     ID['auto']     = AUTO
     ID['boolean']  = BOOLEAN
@@ -64,12 +66,12 @@ class Lexer(sly.Lexer):
     ID['void']     = VOID
     ID['while']    = WHILE
 
-    # Validar longitud de identificadores (<= 255)
-    def ID(self, t):
-        if len(t.value) > 255:
-            self.error(t)
-            return None
-        return t
+    # # Validar longitud de identificadores (<= 255)
+    # def ID(self, t):
+    #     if len(t.value) > 255:
+    #         self.error(t)
+    #         return None
+    #     return t
 
     # -------------------
     # Operadores multi-char
@@ -84,29 +86,22 @@ class Lexer(sly.Lexer):
     DEC = r'--'
     NOT = r'!'
 
-    # -------------------
-    # Literales numéricos
-    # -------------------
-    @_(r'0[xX][0-9a-fA-F]+')
+    @_(r'^\d+$')
     def INT_LIT(self, t):
-        t.value = int(t.value, 16)
+        t.value = int(t.value)
         return t
 
-    @_(r'0[0-7]+')
-    def INT_LIT(self, t):
-        t.value = int(t.value, 8)
-        return t
 
     # Flotantes: .123 | 123. | 123.45 | 1e10 | 1.2E-3
-    @_(r'[+-]?(\d+\.\d*|\.\d+)([eE][+-]?\d+)?|[+-]?\d+[eE][+-]?\d+')
+    @_(r'((0(?!\d))|([1-9]\d*))((\.\d+(e[-+]?\d+)?)|([eE][-+]?\d+))')
     def FLOAT_LIT(self, t):
         t.value = float(t.value)
         return t
 
-    @_(r'\d+')
-    def INT_LIT(self, t):
-        t.value = int(t.value)
-        return t
+ 
+    @_(r'0\d+')
+    def malformed_inumber(self, t):
+        self.error(t)
 
     # -------------------
     # Literales char y string
@@ -142,6 +137,7 @@ class Lexer(sly.Lexer):
     def error(self, t):
         print(f"Line {self.lineno}: Bad character {t.value[0]!r}")
         self.index += 1
+        sys.exit(1)
 
 
 def tokenize(txt):

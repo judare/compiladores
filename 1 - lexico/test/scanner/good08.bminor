@@ -1,0 +1,9 @@
+// area de un circulo
+
+area: function float ( radio: float ) = {
+    return 3.14159265358979323846*radio*radio;
+}
+
+main: function void () = {
+    print(area(10));
+}

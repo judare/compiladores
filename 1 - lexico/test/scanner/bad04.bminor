@@ -1,0 +1,5 @@
+
+
+\t main: function void () = {
+    a: integer = 12;
+}

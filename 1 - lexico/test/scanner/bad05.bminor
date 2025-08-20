@@ -1,0 +1,5 @@
+// bad integer
+
+main: function void () = {
+    a: integer = 01;
+}
