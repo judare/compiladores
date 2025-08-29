@@ -109,11 +109,11 @@ Rule 105   empty -> <empty>
 
 Unused terminals:
 
+    OR
     AUTO
     AND
     NOT
     WHILE
-    OR
 
 Terminals, with rules where they appear:
 
