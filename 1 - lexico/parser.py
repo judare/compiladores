@@ -210,7 +210,7 @@ class Parser(sly.Parser):
 		...
 
 	@_("expr4 EQ expr5")
-	@_("expr4 NE expr5")
+	@_("expr4 NEQ expr5")
 	@_("expr4 LT expr5")
 	@_("expr4 LE expr5")
 	@_("expr4 GT expr5")
@@ -294,19 +294,19 @@ class Parser(sly.Parser):
 	def factor(self, p):
 		...
 
-	@_("INTEGER_LITERAL")
+	@_("INT_LIT")
 	def factor(self, p):
-		return _L(Integer(p.INTEGER_LITERAL), p.lineno)
+		return _L(Integer(p.INT_LIT), p.lineno)
 
-	@_("FLOAT_LITERAL")
+	@_("FLOAT_LIT")
 	def factor(self, p):
-		return _L(Float(p.FLOAT_LITERAL), p.lineno)
+		return _L(Float(p.FLOAT_LIT), p.lineno)
 
-	@_("CHAR_LITERAL")
+	@_("CHAR_LIT")
 	def factor(self, p):
 		...
 		
-	@_("STRING_LITERAL")
+	@_("STRING_LIT")
 	def factor(self, p):
 		...
 		

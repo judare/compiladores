@@ -14,7 +14,7 @@ class Lexer(sly.Lexer):
         # Operadores multi-char
         LE, GE, EQ, NEQ, AND, OR, INC, DEC, NOT,
         # Otros
-        ID
+        ID, LOR, LAND, LT, LE, GT, GE, EQ, NEQ, INC, DEC, NOT
     }
 
     # Literales de un solo carácter
@@ -66,6 +66,18 @@ class Lexer(sly.Lexer):
     ID['void']     = VOID
     ID['while']    = WHILE
 
+    ID['LOR']      = LOR
+    ID['LAND']     = LAND
+    ID['LT']       = LT
+    ID['LE']       = LE
+    ID['GT']       = GT
+    ID['GE']       = GE
+    ID['EQ']       = EQ
+    ID['NEQ']      = NEQ
+    ID['INC']      = INC
+    ID['DEC']      = DEC
+    ID['NOT']      = NOT
+
     # # Validar longitud de identificadores (<= 255)
     # def ID(self, t):
     #     if len(t.value) > 255:
@@ -86,7 +98,7 @@ class Lexer(sly.Lexer):
     DEC = r'--'
     NOT = r'!'
 
-    @_(r'^\d+$')
+    @_(r'(0|[1-9][0-9]*)')
     def INT_LIT(self, t):
         t.value = int(t.value)
         return t
