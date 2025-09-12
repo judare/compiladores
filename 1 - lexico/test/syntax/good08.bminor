@@ -1,0 +1,10 @@
+
+ main: function char () = {
+    pi: boolean = true;
+    x: integer = 4;
+
+    // Pre Increment
+    x++;
+ }
+
+

@@ -10,7 +10,7 @@ class Lexer(sly.Lexer):
     tokens = {
         # Palabras reservadas
         ARRAY, AUTO, BOOLEAN, CHAR, ELSE, FALSE, FLOAT, FOR, FUNCTION,
-        IF, INTEGER, PRINT, RETURN, STRING, TRUE, VOID, WHILE, DO,
+        IF, INTEGER, RETURN, STRING, TRUE, VOID, WHILE, DO,
         # Literales
          FLOAT_LIT, CHAR_LIT, STRING_LIT, INT_LIT,
         # Operadores multi-char
@@ -61,7 +61,7 @@ class Lexer(sly.Lexer):
     ID['function'] = FUNCTION
     ID['if']       = IF
     ID['integer']  = INTEGER
-    ID['print']    = PRINT
+    # ID['print']    = PRINT
     ID['return']   = RETURN
     ID['string']   = STRING
     ID['true']     = TRUE

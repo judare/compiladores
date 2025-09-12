@@ -3,13 +3,9 @@
      pi: boolean = true;
      x: integer = 4;
     
-    if (pi) {
+    do {
         a(x);
-        print(x);
-    }
-
-    for (pi; pi; pi) {
-        a(i);
-    }
+    } while (pi);
+ 
  }
 

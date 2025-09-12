@@ -1,7 +1,13 @@
 
 
+
+a: function integer ( n: integer ) = {
+    return n * 2;
+}
+
  main: function char () = {
      pi: boolean = true;
      x: integer = 4;
+    a(x);
  }
 

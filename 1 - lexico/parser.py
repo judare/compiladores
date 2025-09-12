@@ -87,23 +87,6 @@ class Parser(sly.Parser):
 
 	# Statements
 
-	@_("WHILE '(' opt_expr ')'")
-	def while_header(self, p):
-		return p.opt_expr
-
-	@_("while_header '{' stmt_list '}'")
-	def while_stmt_open(self, p):
-		return WhileStmt(p.while_header, p.open_stmt)
-
-	@_("while_header closed_stmt")
-	def while_stmt_closed(self, p):
-		return WhileStmt(p.while_header, p.closed_stmt)
-
-	# @_("for_header '{' stmt_list '}'")
-	# def for_stmt_closed(self, p):
-	# 	init, cond, step = p.for_header
-	# 	return ForStmt(init, cond, step, p.closed_stmt)
-	
 	# =====================
 	# Statements
 	# =====================
@@ -124,7 +107,6 @@ class Parser(sly.Parser):
 	def stmt_list(self, p):
 		return [p.stmt]
 
-	# @_("open_stmt")
 	@_("closed_stmt")
 	def stmt(self, p):
 		return p[0]
@@ -134,33 +116,20 @@ class Parser(sly.Parser):
 		return p[0]
 
 
-	# =====================
-	# Open statements
-	# =====================
-
-	# @_("if_stmt_open")
-	# @_("while_stmt_open")
-	# @_("for_stmt_open")
-	def open_stmt(self, p):
-		return p[0]
-
 	# ---------------------
 	# Simple statements (no recursivos)
 	# ---------------------
 
-	# @_("print_stmt")
 	@_("return_stmt")
 	@_("block_stmt")
 	@_("decl")
 	@_("if_stmt")
 	@_("for_stmt")
+	@_("while_stmt")
+	@_("do_while_stmt")
 	@_("expr ';'")
 	def simple_stmt(self, p):
 		return p[0]
-
-	# @_("PRINT opt_expr_list ';'")
-	# def print_stmt(self, p):
-	# 	return PrintStmt(p.opt_expr_list)
 
 	@_("RETURN opt_expr ';'")
 	def return_stmt(self, p):
@@ -170,10 +139,15 @@ class Parser(sly.Parser):
 	def block_stmt(self, p):
 		return Block(p.stmt_list)
 
-	@_("IF '(' opt_expr ')' '{' opt_stmt_list '}'")
-	def if_stmt(self, p):
-		return IfStmt(IfCond(p.opt_expr), p.opt_stmt_list)
+	# if
+	@_("IF '(' opt_expr ')'")
+	def if_header(self, p):
+		return p.opt_expr
 
+	@_("if_header '{' opt_stmt_list '}'")
+	def if_stmt(self, p):
+		opt_expr = p.if_header
+		return IfStmt(IfCond(opt_expr), p.opt_stmt_list)
 
 	# for
 	@_("FOR '(' opt_expr ';' opt_expr ';' opt_expr ')'")
@@ -184,6 +158,20 @@ class Parser(sly.Parser):
 	def for_stmt(self, p):
 		init, cond, step = p.for_header
 		return ForStmt(init, cond, step, p.stmt_list)
+
+	# while
+	@_("WHILE '(' opt_expr ')'")
+	def while_header(self, p):
+		return p.opt_expr
+
+	@_("while_header '{' stmt_list '}'")
+	def while_stmt(self, p):
+		return WhileStmt(p.while_header, p.stmt_list)
+
+
+	@_('DO stmt while_header ";"')
+	def do_while_stmt(self, p):
+		return DoWhileStmt(p.stmt, p.while_header)
 
 	
 	
@@ -474,15 +462,6 @@ class Parser(sly.Parser):
 	@_("")
 	def empty(self, p):
 		return None
-
-
-	# @_('WHILE "(" expr ")" stmt')
-	# def stmt(self, p):
-	# 	return WhileStmt(p.expr, p.stmt)
-
-	# @_('DO stmt WHILE "(" expr ")" ";"')
-	# def stmt(self, p):
-	# 	return DoWhileStmt(p.stmt, p.expr)
 	
 	
 	
