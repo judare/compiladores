@@ -521,7 +521,10 @@ if __name__ == '__main__':
 		txt = open(filename, encoding='utf-8').read()
 		ast = parse(txt)
 
-		dicts = print_ast(ast)
-		print(dicts)
+		# detect errors
+		if (ast):
+			dicts = print_ast(ast)
+			print(dicts)
+			
+
 		
-		# print(ast)

@@ -1,0 +1,10 @@
+
+
+ main: function char () = {
+     x: integer = 4;
+
+     if (true) {
+         a(x)
+     }
+ }
+

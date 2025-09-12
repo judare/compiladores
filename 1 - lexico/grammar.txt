@@ -108,11 +108,11 @@ Rule 104   empty -> <empty>
 
 Unused terminals:
 
-    NOT
-    ELSE
-    AUTO
     AND
+    ELSE
     OR
+    NOT
+    AUTO
 
 Terminals, with rules where they appear:
 
