@@ -1,0 +1,14 @@
+
+ main: function char () = {
+     pi: boolean = true;
+     x: integer = 4;
+    
+    if (pi) {
+        a(x);
+    }
+
+    for (pi; pi; pi) {
+        a(i);
+    }
+ }
+

@@ -1,8 +1,5 @@
 # Taller: Analizador Sintáctico
 
-**Fecha de entrega:** 12 de septiembre<br>
-**Duración estimada:** 1 semana
-
 ---
 
 ## 🎯 Objetivos
@@ -80,6 +77,12 @@ print(ast.pretty())
 
 - Ejecutar el recorrido e impresión del AST en consola.
 
+## ✅ Entregables
+
+- Código fuente actualizado del analizador sintáctico (parser.py, model.py).
+- Un archivo de pruebas (test_parser.py) que muestre casos con while, do-while, ++x, --x.
+- Capturas o salida en consola del AST impreso con rich.Tree.
+
 ## 📊 Criterios de Evaluación
 
 | Criterio                                | Descripción                                                                                                     | Ponderación |
@@ -89,9 +92,3 @@ print(ast.pretty())
 | **Gramática: INC/DEC prefijos**         | Reconocimiento de operadores ++x, --x como expresiones válidas y su reflejo en el AST.                          |     20%     |
 | **Visualización del AST con rich.Tree** | Implementación de recorridos pretty() y correcta impresión del árbol en consola.                                |     20%     |
 | Total                                   |                                                                                                                 |    100%     |
-
-## ✅ Entregables
-
-- Código fuente actualizado del analizador sintáctico (parser.py, model.py).
-- Un archivo de pruebas (test_parser.py) que muestre casos con while, do-while, ++x, --x.
-- Capturas o salida en consola del AST impreso con rich.Tree.

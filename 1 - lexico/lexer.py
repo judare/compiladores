@@ -2,13 +2,15 @@
 import sly
 
 class Lexer(sly.Lexer):
+
+    
     # -------------------
     # Tokens
     # -------------------
     tokens = {
         # Palabras reservadas
         ARRAY, AUTO, BOOLEAN, CHAR, ELSE, FALSE, FLOAT, FOR, FUNCTION,
-        IF, INTEGER, PRINT, RETURN, STRING, TRUE, VOID, WHILE,
+        IF, INTEGER, PRINT, RETURN, STRING, TRUE, VOID, WHILE, DO,
         # Literales
          FLOAT_LIT, CHAR_LIT, STRING_LIT, INT_LIT,
         # Operadores multi-char
@@ -65,6 +67,7 @@ class Lexer(sly.Lexer):
     ID['true']     = TRUE
     ID['void']     = VOID
     ID['while']    = WHILE
+    ID['do']       = DO
 
     ID['LOR']      = LOR
     ID['LAND']     = LAND
