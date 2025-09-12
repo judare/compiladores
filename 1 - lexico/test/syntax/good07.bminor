@@ -1,8 +1,6 @@
 
  main: function char () = {
-    pi: boolean = true;
-    x: integer = 4;
-
+    x: integer = 1;
     // Pre Decrement
     --x;
  }

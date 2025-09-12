@@ -1,0 +1,61 @@
+/* =================================================================== *
+ *                                                                     *
+ * mandel.bminor                                                       *
+ *                                                                     *
+ * El conjunto de Mandelbrot es el más estudiado de los fractales.     *
+ * Se conoce así en honor al matemático Benoît Mandelbrot (1924-2010), *
+ * que investigó sobre él en los años setenta.                         *
+ *                                                                     *
+ * =================================================================== */
+
+xmin: float = -2.0;
+xmax: float = 1.0;
+ymin: float = -1.5;
+ymax: float = 1.5;
+width: float = 80.0;
+height: float = 40.0;
+threshhold: integer = 1000;
+
+in_mandelbrot: function bool (x0: float, y0: float, n: integer) = {
+    x: float = 0.0;
+    y: float = 0.0;
+    temp: float;
+
+    while (n > 0) {
+        xtem = x*x - y*y + x0;
+        y = 2.0*x*y + y0;
+        x = temp;
+        n--;
+        if (x*x + y*y > 4.0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+mandel: function integer () = {
+    dx: float = (xmax - xmin) / width;
+    dy: float = (ymax - ymin) / height;
+
+    y: float = ymax;
+    x: float;
+
+    while (y >= ymin) {
+        x = xmin;
+        while (x < xmax) {
+            if in_mandelbrot(x, y, threshhold) {
+                print '*';
+            } else {
+                print '.';
+            }
+            x = x + dx;
+        }
+        print '\n';
+        y = y - dy;
+    }
+    return 0;
+}
+
+main: function integer () = {
+    mandel();
+}

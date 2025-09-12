@@ -1,5 +1,5 @@
 
 
-\t main: function void () = {
+main: function void () = {
     a: integer = 12;
 }

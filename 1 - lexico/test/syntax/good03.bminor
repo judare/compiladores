@@ -1,9 +1,7 @@
 
  main: function char () = {
-     pi: boolean = true;
      x: integer = 4;
-    
-    while (pi) {
+    while (true) {
         a(x);
     }
  }

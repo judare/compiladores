@@ -38,17 +38,6 @@ class VarDecl(Declaration):
     type : Expression
     value: Expression = None
 
-class IfCond:
-    def __init__(self, cond):
-        self.cond = cond
-
-    def pretty(self, tree=None):
-        branch = tree.add("IfCond")
-        if self.cond:
-            self.cond.pretty(branch.add("Cond"))
-        else:
-            branch.add("Cond: <empty>")
-        return tree
 
 class WhileStmt(Statement):
     def __init__(self, cond, body):
@@ -99,6 +88,18 @@ class IfStmt:
                 branch_else.add(str(self.else_branch))
         return tree
 
+class IfCond:
+    def __init__(self, cond):
+        self.cond = cond
+
+    def pretty(self, tree=None):
+        branch = tree.add("IfCond")
+        if self.cond:
+            self.cond.pretty(branch.add("Cond"))
+        else:
+            branch.add("Cond: <empty>")
+        return tree
+
 class PreInc(Expression):
     def __init__(self, expr):
         self.expr = expr
@@ -107,7 +108,6 @@ class PreInc(Expression):
         branch = tree.add("PreInc")
         self.expr.pretty(branch)
         return tree
-
 
 class FuncDecl:
     def __init__(self, name, type_func, body=None):
@@ -123,7 +123,6 @@ class FuncDecl:
         body_branch = branch.add("Body")
         for stmt in self.body:
             stmt.pretty(body_branch)
-
 
 class Identifier:
     def __init__(self, name):
@@ -147,7 +146,6 @@ class PreDec(Expression):
         branch = tree.add("PreDec")
         self.expr.pretty(branch)
         return tree
-
 
 class SimpleType:
     def __init__(self, name):
@@ -285,8 +283,6 @@ class Boolean(Literal):
         self.type = 'boolean'
 
 
-
-
 class Assign:
     def __init__(self, left, right):
         self.left = left
@@ -326,7 +322,6 @@ class String:
         self.value = value
     def pretty(self, tree):
         tree.add(f"String {self.value}")
-
 
 
 class ForStmt:

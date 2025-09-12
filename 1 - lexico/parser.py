@@ -168,7 +168,6 @@ class Parser(sly.Parser):
 	def while_stmt(self, p):
 		return WhileStmt(p.while_header, p.stmt_list)
 
-
 	@_('DO stmt while_header ";"')
 	def do_while_stmt(self, p):
 		return DoWhileStmt(p.stmt, p.while_header)
@@ -473,7 +472,6 @@ class Parser(sly.Parser):
 	def expr9(self, p):
 		return PreDec(p.expr9)
 
-	
 	def error(self, p):
 		if p:
 			lineno = p.lineno if p else 'EOF'
