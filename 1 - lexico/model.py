@@ -61,7 +61,7 @@ class DoWhileStmt(Statement):
         self.cond.pretty(branch.add("Cond"))
         return tree
 
-class IfStmt:
+class IfStmt(Node):
     def __init__(self, cond, then_branch, else_branch=None):
         self.cond = cond
         self.then_branch = then_branch
@@ -88,7 +88,7 @@ class IfStmt:
                 branch_else.add(str(self.else_branch))
         return tree
 
-class IfCond:
+class IfCond(Node):
     def __init__(self, cond):
         self.cond = cond
 
@@ -109,7 +109,7 @@ class PreInc(Expression):
         self.expr.pretty(branch)
         return tree
 
-class FuncDecl:
+class FuncDecl(Node):
     def __init__(self, name, type_func, body=None):
         self.name = name
         self.type_func = type_func
@@ -124,14 +124,14 @@ class FuncDecl:
         for stmt in self.body:
             stmt.pretty(body_branch)
 
-class Identifier:
+class Identifier(Node):
     def __init__(self, name):
         self.name = name
 
     def pretty(self, tree):
         tree.add(f"ID {self.name}")
 
-class Block:
+class Block(Node):
     def __init__(self, body):
         self.body = body
 
@@ -147,7 +147,7 @@ class PreDec(Expression):
         self.expr.pretty(branch)
         return tree
 
-class SimpleType:
+class SimpleType(Node):
     def __init__(self, name):
         self.name = name
 
@@ -155,7 +155,7 @@ class SimpleType:
         tree.add(f"Type {self.name}")
 
 
-class ArrayType:
+class ArrayType(Node):
     def __init__(self, size, elem_type):
         self.size = size      # None si es []
         self.elem_type = elem_type
@@ -167,7 +167,7 @@ class ArrayType:
         self.elem_type.pretty(branch.add("ElementType"))
 
 
-class FuncType:
+class FuncType(Node):
     def __init__(self, ret_type, params):
         self.ret_type = ret_type
         self.params = params
@@ -180,7 +180,7 @@ class FuncType:
             p.pretty(params_branch)
 
 
-class Param:
+class Param(Node):
     def __init__(self, name, typ):
         self.name = name
         self.typ = typ
@@ -189,7 +189,7 @@ class Param:
         branch = tree.add(f"Param {self.name}")
         self.typ.pretty(branch.add("Type"))
 
-class VarDeclInit:
+class VarDeclInit(Node):
     def __init__(self, name, typ, init):
         self.name = name
         self.typ = typ
@@ -205,7 +205,7 @@ class VarDeclInit:
         else:
             self.init.pretty(branch.add("Init"))
 
-class ReturnStmt:
+class ReturnStmt(Node):
     def __init__(self, expr):
         self.expr = expr
 
@@ -283,7 +283,7 @@ class Boolean(Literal):
         self.type = 'boolean'
 
 
-class Assign:
+class Assign(Node):
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -292,7 +292,7 @@ class Assign:
         self.left.pretty(branch.add("Left"))
         self.right.pretty(branch.add("Right"))
 
-class Call:
+class Call(Node):
     def __init__(self, func, args):
         self.func = func
         self.args = args
@@ -302,7 +302,7 @@ class Call:
         for a in self.args:
             a.pretty(branch.add("Arg"))
 
-class ArrayAccess:
+class ArrayAccess(Node):
     def __init__(self, array, index):
         self.array = array
         self.index = index
@@ -311,20 +311,20 @@ class ArrayAccess:
         self.array.pretty(branch.add("Array"))
         self.index.pretty(branch.add("Index"))
 
-class Char:
+class Char(Node):
     def __init__(self, value):
         self.value = value
     def pretty(self, tree):
         tree.add(f"Char {self.value}")
 
-class String:
+class String(Node):
     def __init__(self, value):
         self.value = value
     def pretty(self, tree):
         tree.add(f"String {self.value}")
 
 
-class ForStmt:
+class ForStmt(Node):
     def __init__(self, init, cond, step, body):
         self.init = init
         self.cond = cond

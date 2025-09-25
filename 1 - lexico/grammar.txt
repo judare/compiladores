@@ -110,9 +110,9 @@ Unused terminals:
 
     AND
     ELSE
-    OR
-    NOT
     AUTO
+    NOT
+    OR
 
 Terminals, with rules where they appear:
 
