@@ -351,6 +351,10 @@ class Parser(sly.Parser):
 	def group(self, p):
 		return Call(Identifier(p.ID), p.opt_expr_list)
 
+	@_("PRINT expr")
+	def group(self, p):
+		return PrintStmt(p.expr)
+
 	@_("ID index")
 	def group(self, p):
 		return ArrayAccess(Identifier(p.ID), p.index)

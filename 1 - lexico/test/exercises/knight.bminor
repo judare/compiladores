@@ -22,7 +22,7 @@ print_board: function void (board: array [] integer) = {
 
     for (r = 0; r < N; r++) {
         for (c = 0; c < N; c++) {
-            if (i % 2 == j % 2) {
+            if (r % 2 == c % 2) {
                 print board[index(r,c)];
             }
         }
@@ -31,7 +31,7 @@ print_board: function void (board: array [] integer) = {
 }
 
 // Función auxiliar para validar movtos válidos
-can_move: function boolean (r, integer, c: integer, board: array [] integer) = {
+can_move: function boolean (r: integer, c: integer, board: array [] integer) = {
     return r >= 0 && r < N && c >= 0 && c < N && board[index(r,c)] == 0;
 }
 

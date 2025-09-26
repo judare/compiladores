@@ -16,7 +16,7 @@ class Lexer(sly.Lexer):
         # Operadores multi-char
         LE, GE, EQ, NEQ, AND, OR, INC, DEC, NOT,
         # Otros
-        ID, LOR, LAND, LT, LE, GT, GE, EQ, NEQ, INC, DEC, NOT
+        ID, LOR, LAND, LT, LE, GT, GE, EQ, NEQ, INC, DEC, NOT, PRINT
     }
 
     # Literales de un solo carácter
@@ -61,7 +61,7 @@ class Lexer(sly.Lexer):
     ID['function'] = FUNCTION
     ID['if']       = IF
     ID['integer']  = INTEGER
-    # ID['print']    = PRINT
+    ID['print']    = PRINT
     ID['return']   = RETURN
     ID['string']   = STRING
     ID['true']     = TRUE

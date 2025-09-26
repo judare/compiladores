@@ -338,6 +338,12 @@ class ForStmt(Node):
         if self.step: self.step.pretty(branch.add("Step"))
         self.body.pretty(branch.add("Body"))
 
+
+@dataclass
+class PrintStmt(Statement):
+    expr: Expression
+            
+
 '''
   - Char
   - String

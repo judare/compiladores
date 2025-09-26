@@ -143,6 +143,13 @@ class ASTPrinter(Visitor):
         self.dot.edge(name, n.array.accept(self), label='array')
         self.dot.edge(name, n.index.accept(self), label='index')
         return name
+        
+    def visit(self, n: PrintStmt):
+        name = self.name
+        self.dot.node(name, label='Print')
+        if n.expr:
+            self.dot.edge(name, n.expr.accept(self))
+        return name
 
     # =====================================================================
     # Nodos Hoja (Literales e Identificadores)
@@ -185,4 +192,5 @@ if __name__ == '__main__':
         print("[red]Error:[/red] No se encontró el archivo 'parser.py'.")
         print("Asegúrate de que tu parser esté implementado y en el mismo directorio.")
     except Exception as e:
-        print(f"[red]Ocurrió un error durante el parsing o la impresión:[/red]\n{e}")
+        print(f"[red]Ocurrió un error durante el parsing o la impresión:[/red]")
+        print(e)
