@@ -32,7 +32,7 @@ print_board: function void (board: array [] integer) = {
 
 // Función auxiliar para validar movtos válidos
 can_move: function boolean (r: integer, c: integer, board: array [] integer) = {
-    return r >= 0 && r < N && c >= 0 && c < N && board[index(r,c)] == 0;
+  return r >= 0 && r < N && c >= 0 && c < N && board[index(r,c)] == 0;
 }
 
 // Función recursiva para que el caballo recorra el tablero

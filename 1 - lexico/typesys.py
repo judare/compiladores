@@ -20,7 +20,7 @@ class CheckError(Exception):
 	pass
 	
 	
-typenames = { 'integer', 'float', 'boolean', 'char', 'string' }
+typenames = { 'integer', 'float', 'boolean', 'char', 'string', 'void' }
 
 # Capabilities
 _bin_ops = {

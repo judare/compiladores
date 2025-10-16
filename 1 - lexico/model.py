@@ -92,6 +92,7 @@ class IfStmt(Node):
 class IfCond(Node):
     def __init__(self, cond):
         self.cond = cond
+        self.type = 'boolean'
 
     def pretty(self, tree=None):
         branch = tree.add("IfCond")
@@ -117,7 +118,7 @@ class FuncDecl(Node):
         # FIX: Assign return type from the FuncType node
         self.type = type_func.ret_type
         # FIX: Assign parameters from the FuncType node
-        self.params = type_func.params
+        self.params = type_func.params if type_func.params is not None else []
         # FIX: Ensure body is a list
         self.body = body if body is not None else []
 
@@ -158,6 +159,7 @@ class PreDec(Expression):
 class SimpleType(Node):
     def __init__(self, name):
         self.name = name
+        self.type = name
 
     def pretty(self, tree):
         tree.add(f"Type {self.name}")
@@ -165,6 +167,7 @@ class SimpleType(Node):
 
 class ArrayType(Node):
     def __init__(self, size, elem_type):
+        self.name = "array"
         self.size = size      # None si es []
         self.elem_type = elem_type
 

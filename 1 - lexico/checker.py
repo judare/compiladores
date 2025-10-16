@@ -60,9 +60,9 @@ class Check(Visitor):
         try:
             env.add(n.name, n)
         except Symtab.SymbolConflictError:
-            error(f"La función '{n.name}' ya fue declarada con un tipo diferente", n.lineno)
+            raise CheckError(f"La función '{n.name}' ya fue declarada con un tipo diferente", n.lineno)
         except Symtab.SymbolDefinedError:
-            error(f"La función '{n.name}' ya fue declarada", n.lineno)
+            raise CheckError(f"La función '{n.name}' ya fue declarada", n.lineno)
         
         func_env = Symtab(n.name, env)
         for parm in n.params:
@@ -79,10 +79,11 @@ class Check(Visitor):
         try:
             env.add(n.name, n)
         except Symtab.SymbolConflictError:
-            error(f"El parámetro '{n.name}' ya fue declarado con un tipo diferente", n.lineno)
+            raise CheckError(f"El parámetro '{n.name}' ya fue declarado con un tipo diferente")
         except Symtab.SymbolDefinedError:
-            error(f"El parámetro '{n.name}' ya fue declarado", n.lineno)
-
+            raise CheckError(f"El parámetro '{n.name}' ya fue declarado")
+        except e:
+            raise CheckError(f"Error al agregar el parámetro '{n.name}'")
     # =====================================================================
     # Sentencias (Statements)
     # =====================================================================
@@ -137,6 +138,19 @@ class Check(Visitor):
         for stmt in n.body:
             stmt.accept(self, env)
 
+    def visit(self, n: DoWhileStmt, env: Symtab):
+        pass
+
+    def visit(self, n: ForStmt, env: Symtab):
+        pass
+
+    def visit(self, n: IfCond, env: Symtab):
+        pass
+
+
+    def visit(self, n: ReturnStmt, env: Symtab):
+        pass
+
     def visit(self, n: PrintStmt, env: Symtab):
         if n.expr:
             n.expr.accept(self, env)
@@ -170,8 +184,8 @@ class Check(Visitor):
         '''
         symbol = env.get(n.name)
         if symbol is None:
-            error(f"La variable o función '{n.name}' no está definida", n.lineno)
             n.type = 'undefined' # Para evitar errores en cascada
+            raise SyntaxError(f"La variable o función '{n.name}' no está definida")
         else:
             symbol.type.accept(self, env)
             n.type = symbol.type.name
@@ -200,6 +214,9 @@ class Check(Visitor):
         func.type.accept(self, env)
         n.type = func.type.name
 
+    def visit(self, n: VarDeclInit, env: Symtab):
+        env.add(n.name, n)
+  
 
     # =====================================================================
     # Tipos y Literales (casos base de la recursión)
@@ -210,15 +227,14 @@ class Check(Visitor):
     
     def visit(self, n: SimpleType, env: Symtab):
         if not lookup_type(n.name):
-            error(f"El tipo '{n.name}' no está definido.", n.lineno)
+            raise CheckError(f"El tipo '{n.name}' no está definido.")
 
     def visit(self, n: ArrayType, env: Symtab):
         # Lógica para verificar arreglos (si se implementa)
         n.elem_type.accept(self, env)
-        if n.size:
-            n.size.accept(self, env)
-            if n.size.type != 'integer':
-                error(f"El tamaño de un arreglo debe ser 'integer', no '{n.size.type}'", n.lineno)
+        # if n.size:
+        #     if n.size.type != 'integer':
+        #         error(f"El tamaño de un arreglo debe ser 'integer', no '{n.size.type}'", n.lineno)
 
 
 
@@ -240,3 +256,6 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"[red]Ocurrió un error durante el parsing o la impresión:[/red]")
         print(e)
+        # print stack 
+        import traceback
+        print(traceback.format_exc())

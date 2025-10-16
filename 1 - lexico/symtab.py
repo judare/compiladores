@@ -72,9 +72,9 @@ class Symtab:
 		'''
 		if name in self.entries:
 			if self.entries[name].type != value.type:
-				raise Symtab.SymbolConflictError()
+				raise Symtab.SymbolConflictError("El simbolo ya existe con un tipo diferente")
 			else:
-				raise Symtab.SymbolDefinedError()
+				raise Symtab.SymbolDefinedError("El simbolo ya existe")
 		self.entries[name] = value
 		
 	def get(self, name):
