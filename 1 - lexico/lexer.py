@@ -4,6 +4,7 @@ import sly
 class Lexer(sly.Lexer):
 
     tokens = {
+        EQ, GE, LE,
         # Palabras reservadas
         ARRAY, AUTO, BOOLEAN, CHAR, ELSE, FALSE, FLOAT, FOR, FUNCTION,
         IF, INTEGER, RETURN, STRING, TRUE, VOID, WHILE, DO,
@@ -12,7 +13,7 @@ class Lexer(sly.Lexer):
         # Operadores multi-char
         LE, GE, EQ, NEQ, AND, OR, INC, DEC, NOT,
         # Otros
-        ID, LOR, LAND, LT, LE, GT, GE, EQ, NEQ, INC, DEC, NOT, PRINT
+        ID, LOR, LT, GT, NEQ, INC, DEC, NOT, PRINT
     }
 
     # Literales de un solo carácter
@@ -54,7 +55,6 @@ class Lexer(sly.Lexer):
     ID['do']       = DO
 
     ID['LOR']      = LOR
-    ID['LAND']     = LAND
     ID['LT']       = LT
     ID['LE']       = LE
     ID['GT']       = GT
@@ -75,9 +75,11 @@ class Lexer(sly.Lexer):
     # -------------------
     # Operadores multi-char
     # -------------------
-    LE  = r'<='
     GE  = r'>='
     EQ  = r'=='
+    LE  = r'<='
+    LT  = r'<'
+    GT  = r'>'
     NEQ = r'!='
     AND = r'&&'
     OR  = r'\|\|'

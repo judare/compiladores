@@ -144,6 +144,15 @@ class Parser(sly.Parser):
 	def if_header(self, p):
 		return p.opt_expr
 
+	# Regla para `if-else`. La parte `else` puede ser otra sentencia `if`
+    # (manejando `else if`) o un bloque (manejando el `else` final).
+    # SLY resuelve la ambigüedad del "dangling else" prefiriendo esta regla
+    # sobre la de `if` sin `else` (acción de "shift").
+	@_("if_header '{' opt_stmt_list '}' ELSE '{' opt_stmt_list '}'")
+	def if_stmt(self, p):
+		opt_expr = p.if_header
+		return IfStmt(opt_expr, p.opt_stmt_list0, p.opt_stmt_list1)
+
 	@_("if_header '{' opt_stmt_list '}'")
 	def if_stmt(self, p):
 		opt_expr = p.if_header
@@ -246,7 +255,7 @@ class Parser(sly.Parser):
 	# Logical AND
 	# ---------------------
 
-	@_("expr3 LAND expr4")
+	@_("expr3 AND expr4")
 	def expr3(self, p):
 		return BinOper("&&", p.expr3, p.expr4)
 

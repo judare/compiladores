@@ -1,0 +1,6 @@
+// funcion que suma un entero y un string
+
+main: function void () = {
+    result: integer;
+	result = 3 + "a";
+}

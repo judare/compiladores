@@ -50,7 +50,7 @@ walk: function boolean (r: integer, c: integer, m: integer, board: array [] inte
         if (can_move(next_x, next_y, board)) {
             board[index(next_x, next_y)] = m;
             if (walk(next_x, next_y, m+1, board, xmoves, ymoves)) {
-                return true
+                return true;
             }
             board[index(next_x, next_y)] = 0;
         }
