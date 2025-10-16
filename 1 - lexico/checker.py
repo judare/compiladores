@@ -299,7 +299,8 @@ if __name__ == '__main__':
         txt = open(sys.argv[1], encoding='utf-8').read()
         ast = parse(txt)
         dot = Check.checker(ast)
-        print(ast)
+        # print(ast)
+        dot.print();
     except ImportError:
         print("[red]Error:[/red] No se encontró el archivo 'parser.py'.")
         print("Asegúrate de que tu parser esté implementado y en el mismo directorio.")
