@@ -92,7 +92,6 @@ class IfStmt(Node):
 class IfCond(Node):
     def __init__(self, cond):
         self.cond = cond
-        self.type = 'boolean'
 
     def pretty(self, tree=None):
         branch = tree.add("IfCond")
@@ -295,6 +294,13 @@ class Boolean(Literal):
         assert isinstance(self.value, bool), "Value debe ser un 'boolean'"
         self.type = 'boolean'
 
+@dataclass
+class ExprStmt(Statement):
+    '''
+    Representa una expresión usada como una sentencia.
+    Ej: una llamada a función -> miFuncion(a, b);
+    '''
+    expr: Expression
 
 class Assign(Node):
     def __init__(self, left, right):

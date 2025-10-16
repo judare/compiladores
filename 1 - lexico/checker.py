@@ -139,17 +139,63 @@ class Check(Visitor):
             stmt.accept(self, env)
 
     def visit(self, n: DoWhileStmt, env: Symtab):
-        pass
+        # Visita el cuerpo del bucle
+        body_stmts = n.body.body if isinstance(n.body, Block) else [n.body]
+        for stmt in body_stmts:
+            stmt.accept(self, env)
+            
+        # Visita la condición y verifica que sea booleana
+        n.cond.accept(self, env)
+        if n.cond.type != 'boolean':
+            error(f"La condición del 'do-while' debe ser de tipo 'boolean', no '{n.cond.type}'", n.lineno)
 
     def visit(self, n: ForStmt, env: Symtab):
-        pass
+        # Visita las tres partes de la cabecera del for
+        if n.init:
+            n.init.accept(self, env)
+        if n.cond:
+            n.cond.accept(self, env)
+            # if n.cond.type != 'boolean':
+            #     error(f"La condición del 'for' debe ser de tipo 'boolean', no '{n.cond.type}'", n.lineno)
+        if n.step:
+            n.step.accept(self, env)
+
+        # Visita el cuerpo del bucle
+        body_stmts = n.body.body if isinstance(n.body, Block) else [n.body]
+        for stmt in body_stmts:
+            print(stmt)
+            # stmt.accept(self, env)
 
     def visit(self, n: IfCond, env: Symtab):
-        pass
-
+        # Visita la expresión dentro de la condición
+        n.cond.accept(self, env)
+        # El tipo del nodo IfCond es el tipo de la expresión que envuelve
+        n.type = "boolean" # TODO
 
     def visit(self, n: ReturnStmt, env: Symtab):
-        pass
+        # 1. Asegurarse de que no esté en el ámbito global
+        if env.name == 'global':
+            error("La instrucción 'return' no puede estar fuera de una función", n.lineno)
+            return
+
+        # 2. Obtener el tipo de retorno esperado de la función actual
+        func = env.get(env.name)
+        func.type.accept(self, env)
+        expected_type = func.type.name
+        
+        # 3. Comprobar la expresión de retorno
+        if n.expr:
+            # Caso: return <expression>;
+            if expected_type == 'void':
+                raise CheckError(f"La función '{func.name}' es de tipo 'void' y no puede retornar un valor")
+            
+            n.expr.accept(self, env)
+            # Comprueba si el tipo retornado coincide con el esperado
+            # if n.expr.type != expected_type:
+            #     error(f"Tipo de retorno incompatible. La función '{func.name}' esperaba '{expected_type}' pero recibió '{n.expr.type}'", n.lineno)
+        else:
+            if expected_type != 'void':
+                raise CheckError(f"La función '{func.name}' debe retornar un valor de tipo '{expected_type}'")
 
     def visit(self, n: PrintStmt, env: Symtab):
         if n.expr:
@@ -159,16 +205,20 @@ class Check(Visitor):
     # Expresiones (devuelven un tipo)
     # =====================================================================
     def visit(self, n: BinOper, env: Symtab):
-        '''
-        1. Visitar n.left y n.right para obtener sus tipos.
-        2. Verificar si n.oper es una operación permitida entre esos tipos.
-        3. Anotar el tipo resultante en el nodo.
-        '''
-        n.left.accept(self, env)
-        n.right.accept(self, env)
-        n.type = check_binop(n.oper, n.left.type, n.right.type)
-        if n.type is None:
-            raise SyntaxError(f"Operación inválida '{n.oper}' entre los tipos '{n.left.type}' y '{n.right.type}'")
+        pass
+        # '''
+        # 1. Visitar n.left y n.right para obtener sus tipos.
+        # 2. Verificar si n.oper es una operación permitida entre esos tipos.
+        # 3. Anotar el tipo resultante en el nodo.
+        # '''
+        # n.left.accept(self, env)
+        # n.right.accept(self, env)
+        # n.type = check_binop(n.oper, n.left.type, n.right.type)
+        # if n.type is None:
+        #     raise SyntaxError(f"Operación inválida '{n.oper}' entre los tipos '{n.left.type}' y '{n.right.type}'")
+
+    def visit(self, n: ExprStmt, env: Symtab):
+        n.expr.accept(self, env)
 
     def visit(self, n: UnaryOper, env: Symtab):
         n.expr.accept(self, env)
@@ -257,5 +307,5 @@ if __name__ == '__main__':
         print(f"[red]Ocurrió un error durante el parsing o la impresión:[/red]")
         print(e)
         # print stack 
-        import traceback
-        print(traceback.format_exc())
+        # import traceback
+        # print(traceback.format_exc())
