@@ -1,5 +1,7 @@
+# model.py
+
 from dataclasses import dataclass, field
-from multimethod import multimeta, multimethod
+from multimethod import multimeta
 from typing      import List, Union
 
 # =====================================================================
@@ -37,7 +39,6 @@ class VarDecl(Declaration):
     name : str
     type : Expression
     value: Expression = None
-
 
 class WhileStmt(Statement):
     def __init__(self, cond, body):
@@ -113,16 +114,23 @@ class FuncDecl(Node):
     def __init__(self, name, type_func, body=None):
         self.name = name
         self.type_func = type_func
-        self.body = body
+        # FIX: Assign return type from the FuncType node
+        self.type = type_func.ret_type
+        # FIX: Assign parameters from the FuncType node
+        self.params = type_func.params
+        # FIX: Ensure body is a list
+        self.body = body if body is not None else []
 
     def pretty(self, tree):
-        branch = tree.add(f"FuncDecl {self.name}: {self.ret_type}")
+        branch = tree.add(f"FuncDecl {self.name}: {self.type.name if hasattr(self.type, 'name') else 'complex type'}")
         params_branch = branch.add("Params")
         for p in self.params:
             p.pretty(params_branch)
         body_branch = branch.add("Body")
-        for stmt in self.body:
-            stmt.pretty(body_branch)
+        if self.body:
+            for stmt in self.body:
+                if hasattr(stmt, 'pretty'):
+                    stmt.pretty(body_branch)
 
 class Identifier(Node):
     def __init__(self, name):
@@ -170,7 +178,7 @@ class ArrayType(Node):
 class FuncType(Node):
     def __init__(self, ret_type, params):
         self.ret_type = ret_type
-        self.params = params
+        self.params = params if params is not None else []
 
     def pretty(self, tree):
         branch = tree.add("FuncType")
@@ -183,21 +191,23 @@ class FuncType(Node):
 class Param(Node):
     def __init__(self, name, typ):
         self.name = name
-        self.typ = typ
+        self.type = typ
 
     def pretty(self, tree):
         branch = tree.add(f"Param {self.name}")
-        self.typ.pretty(branch.add("Type"))
+        self.type.pretty(branch.add("Type"))
 
 class VarDeclInit(Node):
     def __init__(self, name, typ, init):
         self.name = name
-        self.typ = typ
+        self.type = typ
         self.init = init
+        # Replicate VarDecl structure for checker compatibility
+        self.value = init
 
     def pretty(self, tree):
         branch = tree.add(f"VarDeclInit {self.name}")
-        self.typ.pretty(branch.add("Type"))
+        self.type.pretty(branch.add("Type"))
         if isinstance(self.init, list):
             init_branch = branch.add("InitList")
             for e in self.init:
@@ -311,15 +321,25 @@ class ArrayAccess(Node):
         self.array.pretty(branch.add("Array"))
         self.index.pretty(branch.add("Index"))
 
-class Char(Node):
-    def __init__(self, value):
-        self.value = value
+@dataclass
+class Char(Literal):
+    value: str
+
+    def __post_init__(self):
+        assert isinstance(self.value, str), "Value must be a 'str'"
+        self.type = 'char'
+    
     def pretty(self, tree):
         tree.add(f"Char {self.value}")
 
-class String(Node):
-    def __init__(self, value):
-        self.value = value
+@dataclass
+class String(Literal):
+    value: str
+
+    def __post_init__(self):
+        assert isinstance(self.value, str), "Value must be a 'str'"
+        self.type = 'string'
+
     def pretty(self, tree):
         tree.add(f"String {self.value}")
 
@@ -342,17 +362,3 @@ class ForStmt(Node):
 @dataclass
 class PrintStmt(Statement):
     expr: Expression
-            
-
-'''
-  - Char
-  - String
-  - Increment (pre/post fijo)
-  - Decrement
-  - FuncCall
-
-  +-- Location ('load'/'store')
-    -- VarLoc
-    -- ArrayLoc
-
-'''

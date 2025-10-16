@@ -5,5 +5,6 @@ sum: function integer ( a: integer, b: integer ) = {
 }
 
 main: function void () = {
-    print(sum(1,2));
+    print(suma(1,2));
 }
+

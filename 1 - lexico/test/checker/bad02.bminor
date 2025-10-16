@@ -1,0 +1,9 @@
+// funcion de 2 parametros, pero se pasa un tercero
+
+sumar: function integer ( a: integer, b: integer ) = {
+    return a+b;
+}
+
+main: function void () = {
+    sumar(1,2, 3);
+}

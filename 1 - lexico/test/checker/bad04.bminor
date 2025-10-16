@@ -1,0 +1,6 @@
+// funcion que espera 2 enteros, pero se pasa un string
+
+main: function void () = {
+    result: integer;
+	result = "a";
+}

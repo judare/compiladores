@@ -1,0 +1,9 @@
+// funcion que espera 2 enteros, pero se pasa un string
+
+sumar: function integer ( a: integer, b: integer ) = {
+    return a+b;
+}
+
+main: function void () = {
+    sumar(1,"a");
+}

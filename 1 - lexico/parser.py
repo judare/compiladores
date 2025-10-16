@@ -481,9 +481,11 @@ class Parser(sly.Parser):
 			lineno = p.lineno if p else 'EOF'
 			value = repr(p.value) if p else 'EOF'
 			# expected = self.state.expect  # tokens esperados en ese estado
-			print(f"Syntax error at line {lineno}: unexpected {value} ({p.type}) ")
+			# print(f"Syntax error at line {lineno}: unexpected {value} ({p.type}) ")
+			raise SyntaxError(f"Syntax error at line {lineno}: unexpected {value} ({p.type})")
 		else:
 			print("Syntax error at EOF")
+		# create exception
 
 
 

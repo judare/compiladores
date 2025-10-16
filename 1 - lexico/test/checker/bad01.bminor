@@ -1,0 +1,6 @@
+
+// function no existe
+
+main: function void () = {
+    noexiste(1,2);
+}

@@ -3,10 +3,6 @@ import sly
 
 class Lexer(sly.Lexer):
 
-    
-    # -------------------
-    # Tokens
-    # -------------------
     tokens = {
         # Palabras reservadas
         ARRAY, AUTO, BOOLEAN, CHAR, ELSE, FALSE, FLOAT, FOR, FUNCTION,
@@ -25,16 +21,10 @@ class Lexer(sly.Lexer):
     # Ignorar espacios y tabs
     ignore = ' \t\r'
 
-    # -------------------
-    # Manejo de líneas
-    # -------------------
     @_(r'\n+')
     def ignore_newline(self, t):
         self.lineno += len(t.value)
 
-    # -------------------
-    # Comentarios
-    # -------------------
     @_(r'//.*')
     def ignore_cpp_comment(self, t):
         pass
@@ -42,12 +32,6 @@ class Lexer(sly.Lexer):
     @_(r'/\*(.|\n)*?\*/')
     def ignore_c_comment(self, t):
         self.lineno += t.value.count('\n')
-
-    # -------------------
-    # Identificadores y palabras clave
-    # -------------------
-
-
 
     ID = r"[a-zA-Z_][a-zA-Z0-9_]*"
     ID['array']    = ARRAY

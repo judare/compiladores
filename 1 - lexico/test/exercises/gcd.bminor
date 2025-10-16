@@ -1,0 +1,15 @@
+gcd: function integer (m: integer, n: integer) = {
+	if (m % n == 0) {
+		return n;
+	} else {
+		return gcd(n, m % n);
+	}
+}
+
+main: function void () = {
+	result: integer;
+
+	result = gcd(20, 8);
+	print result;
+}
+

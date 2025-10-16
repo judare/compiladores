@@ -109,10 +109,10 @@ Rule 105   empty -> <empty>
 
 Unused terminals:
 
-    OR
     ELSE
-    NOT
     AND
+    NOT
+    OR
     AUTO
 
 Terminals, with rules where they appear:
