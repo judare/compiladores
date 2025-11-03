@@ -41,11 +41,11 @@ class Lexer(sly.Lexer):
     ID['char']     = CHAR
     ID['else']     = ELSE
     ID['false']    = FALSE
-    ID['float']    = FLOAT
     ID['for']      = FOR
     ID['function'] = FUNCTION
     ID['if']       = IF
     ID['integer']  = INTEGER
+    ID['float']    = FLOAT
     ID['print']    = PRINT
     ID['return']   = RETURN
     ID['string']   = STRING
@@ -87,17 +87,17 @@ class Lexer(sly.Lexer):
     DEC = r'--'
     NOT = r'!'
 
+        # Flotantes: .123 | 123. | 123.45 | 1e10 | 1.2E-3
+    @_(r'((0(?!\d))|([1-9]\d*))((\.\d+(e[-+]?\d+)?)|([eE][-+]?\d+))')
+    def FLOAT_LIT(self, t):
+        t.value = float(t.value)
+        return t
+
     @_(r'(0|[1-9][0-9]*)')
     def INT_LIT(self, t):
         t.value = int(t.value)
         return t
 
-
-    # Flotantes: .123 | 123. | 123.45 | 1e10 | 1.2E-3
-    @_(r'((0(?!\d))|([1-9]\d*))((\.\d+(e[-+]?\d+)?)|([eE][-+]?\d+))')
-    def FLOAT_LIT(self, t):
-        t.value = float(t.value)
-        return t
 
  
     @_(r'0\d+')

@@ -110,8 +110,8 @@ Rule 106   empty -> <empty>
 
 Unused terminals:
 
-    NOT
     OR
+    NOT
     AUTO
 
 Terminals, with rules where they appear:

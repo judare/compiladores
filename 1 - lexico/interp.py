@@ -39,6 +39,18 @@ def _is_truthy(value):
   return True
 
 
+class BuiltinFunction:
+    '''Wrapper para funciones nativas de Python (built-ins).'''
+    def __init__(self, func, arity=-1):
+        self.func = func
+        self.arity = arity # -1 significa aridad variable
+
+    def __call__(self, interp, *args):
+        try:
+            return self.func(*args)
+        except Exception as e:
+            # Propaga errores de la función nativa
+            interp.error(None, f"Error en built-in '{self.func.__name__}': {e}")
 
 class Function:
     '''Representa una función definida por el usuario (clausura).'''
@@ -87,6 +99,38 @@ class Interpreter(Visitor):
     '''
     def __init__(self):
         self.env = ChainMap()
+        self._add_builtins()
+
+    def _add_builtins(self):
+        '''Añade funciones built-in al entorno global.'''
+
+        def builtin_read_int():
+            try:
+                return int(input())
+            except ValueError:
+                return 0
+        
+        def builtin_read_float():
+            try:
+                return float(input())
+            except ValueError:
+                return 0.0
+
+        def builtin_read_string():
+            return input()
+
+        def builtin_array_length(arr):
+            return len(arr)
+
+        builtins = {
+            'read_int': BuiltinFunction(builtin_read_int, 0),
+            'read_float': BuiltinFunction(builtin_read_float, 0),
+            'read_string': BuiltinFunction(builtin_read_string, 0),
+            'array_length': BuiltinFunction(builtin_array_length, 1),
+        }
+
+        for name, func in builtins.items():
+            self.env[name] = func
 
     def error(self, node, message):
         '''Reporta un error en tiempo de ejecución.'''
@@ -260,7 +304,8 @@ class Interpreter(Visitor):
 
                 # 3. Cuerpo
                 try:
-                    node.body.accept(self)
+                    for stmt in node.body:
+                        stmt.accept(self)
                 except BreakException:
                     break # Salir del 'for'
                 except ContinueException:
@@ -288,6 +333,7 @@ class Interpreter(Visitor):
     # =================================================================
     
     def visit(self, node: BinOper):
+        # print( node.right)
         left = node.left.accept(self)
         right = node.right.accept(self)
 

@@ -1,0 +1,17 @@
+// calcular e
+
+calcular_e: function float () = {
+    i: integer;
+    factorial: integer;
+    e: float = 1;
+    factorial = 1;
+    for( i=1; i<10; i = i + 1 ) {
+        factorial = factorial * i;
+        e = e +  1.0 / factorial;
+    }
+    return e;
+}
+
+main: function void () = {
+    print calcular_e();
+}

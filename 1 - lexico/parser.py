@@ -225,7 +225,7 @@ class Parser(sly.Parser):
 
 	@_("lval '=' expr1")
 	def expr1(self, p):
-		return BinOper("=", p.lval, p.expr1)
+		return Assign(p.lval, p.expr1)
 
 	@_("expr2")
 	def expr1(self, p):
