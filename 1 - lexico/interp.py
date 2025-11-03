@@ -417,6 +417,7 @@ class Interpreter(Visitor):
         elif isinstance(lvalue_node, ArrayAccess):
             # Asignación a array: a[i] = ...
             arr = lvalue_node.array.accept(self)
+            
             idx = lvalue_node.index.accept(self)
             if not isinstance(arr, list):
                 self.error(lvalue_node, "Base de acceso a array no es un array")
@@ -496,7 +497,7 @@ class Interpreter(Visitor):
         
     def visit(self, node: ArrayAccess):
         arr = node.array.accept(self)
-        idx = node.index.accept(self)
+        idx = node.pos.accept(self)
         
         if not isinstance(arr, list):
             self.error(node, "Base de acceso a array no es un array")

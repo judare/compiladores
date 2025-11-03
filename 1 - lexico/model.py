@@ -330,11 +330,11 @@ class Call(Node):
 class ArrayAccess(Node):
     def __init__(self, array, index):
         self.array = array
-        self.index = index
+        self.pos = index
     def pretty(self, tree):
         branch = tree.add("ArrayAccess")
         self.array.pretty(branch.add("Array"))
-        self.index.pretty(branch.add("Index"))
+        self.pos.pretty(branch.add("Index"))
 
 @dataclass
 class Char(Literal):

@@ -235,9 +235,9 @@ class Parser(sly.Parser):
 	def lval(self, p):
 		return Identifier(p.ID)
 
-	@_("ID index")
+	@_("ID indexPos")
 	def lval(self, p):
-		return ArrayAccess(Identifier(p.ID), p.index)
+		return ArrayAccess(Identifier(p.ID), p.indexPos)
 
 	# ---------------------
 	# Logical OR
@@ -364,9 +364,9 @@ class Parser(sly.Parser):
 	def group(self, p):
 		return PrintStmt(p.expr)
 
-	@_("ID index")
+	@_("ID indexPos")
 	def group(self, p):
-		return ArrayAccess(Identifier(p.ID), p.index)
+		return ArrayAccess(Identifier(p.ID), p.indexPos)
 
 	@_("factor")
 	def group(self, p):
@@ -377,7 +377,7 @@ class Parser(sly.Parser):
 	# ---------------------
 
 	@_("'[' expr ']'")
-	def index(self, p):
+	def indexPos(self, p):
 		return p.expr
 
 	# ---------------------
@@ -433,10 +433,10 @@ class Parser(sly.Parser):
 		# tamaño vacío => None
 		return ArrayType(None, p[-1])
 
-	@_("ARRAY index type_simple")
-	@_("ARRAY index type_array_sized")
+	@_("ARRAY indexPos type_simple")
+	@_("ARRAY indexPos type_array_sized")
 	def type_array_sized(self, p):
-		return ArrayType(p.index, p[-1])
+		return ArrayType(p.indexPos, p[-1])
 
 	@_("FUNCTION type_simple '(' opt_param_list ')'")
 	@_("FUNCTION type_array_sized '(' opt_param_list ')'")
