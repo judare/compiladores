@@ -256,7 +256,8 @@ class Interpreter(Visitor):
     def visit(self, node: WhileStmt):
         while _is_truthy(node.cond.accept(self)):
             try:
-                node.body.accept(self)
+                for stmt in node.body:
+                    stmt.accept(self)
             except BreakException:
                 break # Salir del bucle
             except ContinueException:

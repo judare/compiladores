@@ -1,0 +1,18 @@
+
+ main: function char () = {
+     x: integer = 10;
+    
+    while (x > 0) {
+        print x;
+        print "\n";
+        x = x - 1;
+    }
+
+    do {
+       print x;
+       print "\n";
+        x = x - 1;
+    } while (x > 0);
+ 
+ }
+
