@@ -9,3 +9,4 @@ main: function void () = {
         print "true";
     } 
 }
+

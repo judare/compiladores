@@ -24,7 +24,7 @@ python3 bminor.py --ast test/syntax/good01.bminor
 python3 bminor.py --checker test/syntax/good01.bminor
 ```
 
-## Interpreter
+## Interprete
 
 ```bash
 python3 bminor.py --interp test/interp/good01.bminor

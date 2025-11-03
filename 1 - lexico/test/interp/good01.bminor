@@ -3,3 +3,4 @@
 main: function void () = {
     print "hola mundo";
 }  
+

@@ -9,7 +9,6 @@ main: function void () = {
     for (i=0; i < N; i = i + 1) {
         isprime[i] = true;
     }
-
     isprime[0] = false;
     isprime[1] = false;
 
@@ -20,7 +19,6 @@ main: function void () = {
             }
         }
     }
-
     for (i = 0; i < N; i = i + 1) {
         if (isprime[i]) {
             print i;

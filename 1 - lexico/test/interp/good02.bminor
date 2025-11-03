@@ -6,3 +6,4 @@ main: function void () = {
          print "mundo";
      }
 }
+
