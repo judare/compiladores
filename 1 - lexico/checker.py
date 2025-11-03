@@ -112,9 +112,9 @@ class Check(Visitor):
         n.right.accept(self, env)
         n.left.accept(self, env)
         
-        n.type = check_binop('=', n.left.type, n.right.type)
-        if n.type is None:
-            error(f"Asignación inválida. No se puede asignar tipo '{n.right.type}' a '{n.left.type}'", n.lineno)
+        # n.type = check_binop('=', n.left.type, n.right.type)
+        # if n.type is None:
+        #     error(f"Asignación inválida. No se puede asignar tipo '{n.right.type}' a '{n.left.type}'", n.lineno)
 
     def visit(self, n: IfStmt, env: Symtab):
         n.cond.accept(self, env)
@@ -304,9 +304,9 @@ if __name__ == '__main__':
         print("Asegúrate de que tu parser esté implementado y en el mismo directorio.")
     except Exception as e:
         print(f"[red]Ocurrió un error durante el parsing o la impresión:[/red]")
-        print(e)
+        # print(e)
         # print stack 
-        # import traceback
-        # print(traceback.format_exc())
+        import traceback
+        print(traceback.format_exc())
 
 

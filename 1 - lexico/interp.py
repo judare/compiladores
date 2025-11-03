@@ -2,13 +2,10 @@
 Tree-walking interpreter para model.py
 '''
 
-from collections import ChainMap
 from rich import print  # Usado por el intérprete de ejemplo
 from model import * # Importa todas las clases de model.py
+from symtab import Symtab # Importa la Tabla de Símbolos
 
-# =====================================================================
-# Excepciones de Control de Flujo
-# =====================================================================
 
 class ReturnException(Exception):
     '''Excepción para manejar la sentencia 'return'.'''
@@ -53,40 +50,36 @@ class BuiltinFunction:
             interp.error(None, f"Error en built-in '{self.func.__name__}': {e}")
 
 class Function:
-    '''Representa una función definida por el usuario (clausura).'''
-    def __init__(self, node: FuncDecl, env: ChainMap):
-        self.node = node
-        self.env = env # El entorno léxico donde se definió la función
 
-    @property
-    def arity(self) -> int:
-        return len(self.node.params)
+  def __init__(self, node, env):
+    self.node = node
+    self.env = env
 
-    def __call__(self, interp, *args):
-        # Crear un nuevo entorno para la ejecución de la función
-        # Este entorno tiene como padre el entorno léxico de la función
-        newenv = self.env.new_child()
+  @property
+  def arity(self) -> int:
+    return len(self.node.params)
 
-        # Vincular argumentos a parámetros en el nuevo entorno
-        for param_node, arg_value in zip(self.node.params, args):
-            newenv[param_node.name] = arg_value
+  def __call__(self, interp, *args):
 
-        # Guardar el entorno antiguo y activar el nuevo
-        oldenv = interp.env
-        interp.env = newenv
-        result = None
+    call_env = Symtab(self.node.name, self.env)
 
-        try:
-            # Ejecutar el cuerpo de la función
-            for stmt in self.node.body:
-                stmt.accept(interp)
-        except ReturnException as e:
-            result = e.value # Capturar el valor de retorno
-        finally:
-            # Restaurar el entorno antiguo
-            interp.env = oldenv
+    for param_node, arg_value in zip(self.node.params, args):
+        call_env.add(param_node.name, arg_value) # Ej: call_env.add('base', 10)
+
+    result = None 
+    try:
+      for stmt in self.node.body:
+        stmt.accept(interp, call_env) 
         
-        return result
+    except ReturnException as e:
+      result = e.value
+      
+    return result
+
+
+  def bind(self, instance):
+    self.env.add("this", instance)
+    return Function(self.node, self.env)
 
 # =====================================================================
 # Intérprete Principal
@@ -98,10 +91,10 @@ class Interpreter(Visitor):
     definido con 'multimeta' en model.py.
     '''
     def __init__(self):
-        self.env = ChainMap()
-        self._add_builtins()
+        self.global_env = Symtab('global')
+        self._add_builtins(self.global_env)
 
-    def _add_builtins(self):
+    def _add_builtins(self, env: Symtab):
         '''Añade funciones built-in al entorno global.'''
 
         def builtin_read_int():
@@ -130,7 +123,7 @@ class Interpreter(Visitor):
         }
 
         for name, func in builtins.items():
-            self.env[name] = func
+            env.add(name, func)
 
     def error(self, node, message):
         '''Reporta un error en tiempo de ejecución.'''
@@ -142,6 +135,8 @@ class Interpreter(Visitor):
         '''Helper para operaciones binarias numéricas.'''
         if isinstance(left, (int, float)) and isinstance(right, (int, float)):
             return True
+        
+        print (left, right)
         self.error(node, f"En '{node.oper}', los operandos deben ser números (recibido {type(left).__name__} y {type(right).__name__})")
 
     def _check_numeric_operand(self, node, value):
@@ -150,41 +145,20 @@ class Interpreter(Visitor):
             return True
         self.error(node, f"En '{node.oper}', el operando debe ser un número (recibido {type(value).__name__})")
 
-    def _define(self, name: str, value):
-        '''Define una nueva variable en el *entorno actual*.'''
-        self.env[name] = value
+  
 
-    def _assign(self, name: str, value):
-        '''Asigna un valor a una variable *existente* en el entorno.'''
-        for scope in self.env.maps:
-            if name in scope:
-                scope[name] = value
-                return
-        self.error(None, f"Asignación a variable no definida '{name}'")
-    
-    def _lookup(self, name: str):
-        '''Busca una variable en los entornos.'''
-        try:
-            return self.env[name]
-        except KeyError:
-            self.error(None, f"Variable no definida '{name}'")
-
-    # =================================================================
-    # Punto de Entrada
-    # =================================================================
 
     def interpret(self, node: Node):
         '''Punto de entrada principal para interpretar un AST.'''
         try:
-            node.accept(self)
+            env = node.accept(self)
 
-            main_func = self.env.get('main')
+
+            main_func = env.get('main')
 
             # 3. Si 'main' existe y es una función, llamarla
             if main_func and callable(main_func):
-                
-                # 3a. Verificar que 'main' no requiera argumentos
-                # (En un intérprete más complejo, aquí pasaríamos argc/argv)
+            
                 arity = 0
                 if hasattr(main_func, 'arity'):
                     arity = main_func.arity
@@ -192,9 +166,7 @@ class Interpreter(Visitor):
                 if arity != 0:
                     self.error(None, f"La función 'main' debe definirse sin argumentos (esperado 0, pero tiene {arity})")
 
-                # 3b. Llamar a la función 'main'
-                # (Recordar que __call__ espera 'self' (el intérprete) 
-                # como primer argumento)
+      
                 main_func(self)
         except BminorExit:
             pass # Error ya reportado
@@ -208,137 +180,172 @@ class Interpreter(Visitor):
     # =================================================================
 
     def visit(self, node: Program):
+        env = Symtab('global')
         for stmt in node.body:
-            stmt.accept(self)
+            stmt.accept(self, env)
+        return env
 
-    def visit(self, node: Block):
-        # Un bloque crea un nuevo entorno léxico
-        oldenv = self.env
-        self.env = self.env.new_child()
-        try:
-            for stmt in node.body:
-                stmt.accept(self)
-        finally:
-            # Restaura el entorno anterior al salir del bloque
-            self.env = oldenv
+    def visit(self, node: Block, env: Symtab):
+     
+        for stmt in node.body:
+            stmt.accept(self, env)
             
-    def visit(self, node: FuncDecl):
-        # Definir la función en el entorno actual
-        func = Function(node, self.env)
-        self._define(node.name, func)
+    def visit(self, n: FuncDecl, env: Symtab):
+        func_env = Symtab(n.name, env)
+        func = Function(n, func_env)
+        env.add(n.name, func)
 
-    def visit(self, node: VarDecl):
-        # Declaración de variable (con o sin inicializador)
-        value = None
-        if node.value:
-            value = node.value.accept(self)
-        self._define(node.name, value)
+    def visit(self, node: VarDecl, env: Symtab):
+        value = None # Valor por defecto
 
-    def visit(self, node: VarDeclInit):
+        # Comprobar si es una declaración de array
+        if isinstance(node.type, ArrayType):
+            if node.type.size:
+                # Es un array con tamaño, ej: array [N] boolean
+                size_val = node.type.size.accept(self, env)
+                
+                if not isinstance(size_val, int):
+                    self.error(node, f"Tamaño del array '{node.name}' no es un entero (es {type(size_val).__name__})")
+                if size_val < 0:
+                    self.error(node, f"Tamaño del array '{node.name}' no puede ser negativo ({size_val})")
+
+                # Determinar el valor por defecto para los elementos
+                default_elem_val = None
+                
+                # Necesitamos encontrar el tipo base (puede ser un array de arrays)
+                elem_type = node.type.elem_type
+                while isinstance(elem_type, ArrayType):
+                     elem_type = elem_type.elem_type
+
+                if isinstance(elem_type, SimpleType):
+                    if elem_type.name == 'integer':
+                        default_elem_val = 0
+                    elif elem_type.name == 'float':
+                        default_elem_val = 0.0
+                    elif elem_type.name == 'boolean':
+                        default_elem_val = False # <-- El valor clave para 'isprime'
+                    elif elem_type.name == 'string':
+                        default_elem_val = ""
+                    elif elem_type.name == 'char':
+                        default_elem_val = '\0' 
+                
+                # Asignar una nueva lista (el array) con los valores por defecto
+                value = [default_elem_val] * size_val
+            else:
+                # Es un array sin tamaño (ej: 'array [] boolean' en un parámetro)
+                value = None
+        
+        # Opcional: Asignar valores por defecto a tipos simples también
+        elif isinstance(node.type, SimpleType):
+            if node.type.name == 'integer': value = 0
+            elif node.type.name == 'float': value = 0.0
+            elif node.type.name == 'boolean': value = False
+            elif node.type.name == 'string': value = ""
+            elif node.type.name == 'char': value = '\0'
+
+        env.add(node.name, value)
+
+    def visit(self, node: VarDeclInit, env: Symtab):
         # Declaración con inicializador (potencialmente lista para array)
         if isinstance(node.init, list):
             # Inicialización de array
-            value = [item.accept(self) for item in node.init]
+            value = [item.accept(self, env) for item in node.init]
         elif node.init:
             # Inicialización de variable simple
-            value = node.init.accept(self)
+            value = node.init.accept(self, env)
         else:
             value = None
-        self._define(node.name, value)
+        env.add(node.name, value)
         
-    def visit(self, node: PrintStmt):
-        value = node.expr.accept(self)
+    def visit(self, node: PrintStmt, env):
+        value = node.expr.accept(self, env)
         if isinstance(value, str):
             # Interpretar secuencias de escape
             value = value.replace('\\n', '\n').replace('\\t', '\t')
         print(value, end='')
 
-    def visit(self, node: WhileStmt):
-        while _is_truthy(node.cond.accept(self)):
+    def visit(self, node: WhileStmt, env: Symtab):
+        while _is_truthy(node.cond.accept(self, env)):
             try:
                 for stmt in node.body:
-                    stmt.accept(self)
+                    stmt.accept(self, env)
             except BreakException:
                 break # Salir del bucle
             except ContinueException:
                 continue # Saltar a la siguiente iteración
 
-    def visit(self, node: DoWhileStmt):
+    def visit(self, node: DoWhileStmt, env: Symtab):
         while True:
             try:
-                node.body.accept(self)
+                node.body.accept(self, env)
             except BreakException:
                 break
             except ContinueException:
                 # En do-while, 'continue' va a la condición
                 pass
             
-            if not _is_truthy(node.cond.accept(self)):
+            if not _is_truthy(node.cond.accept(self, env)):
                 break
 
-    def visit(self, node: IfStmt):
-        cond_val = node.cond.accept(self)
+    def visit(self, node: IfStmt, env: Symtab):
+        # return  self.error(node, "División por cero "+str(node.cond.cond));
+        cond_val = node.cond.accept(self, env)
         if _is_truthy(cond_val):
             for stmt in node.then_branch:
-                stmt.accept(self)
+                stmt.accept(self, env)
         elif node.else_branch:
             for stmt in node.else_branch:
-                stmt.accept(self)
-            
-    def visit(self, node: ForStmt):
-        # El 'for' crea su propio entorno
-        oldenv = self.env
-        self.env = self.env.new_child()
-        try:
-            # 1. Inicializador
-            if node.init:
-                node.init.accept(self)
-            
-            while True:
-                # 2. Condición
-                cond_val = True # 'for(;;)' es un bucle infinito
-                if node.cond:
-                    cond_val = node.cond.accept(self)
-                
-                if not _is_truthy(cond_val):
-                    break # Salir del bucle
+                stmt.accept(self, env)
 
-                # 3. Cuerpo
-                try:
-                    for stmt in node.body:
-                        stmt.accept(self)
-                except BreakException:
-                    break # Salir del 'for'
-                except ContinueException:
-                    # 'continue' salta al 'step'
-                    pass
-                
-                # 4. Step
-                if node.step:
-                    node.step.accept(self)
-        finally:
-            self.env = oldenv # Restaurar entorno
 
-    def visit(self, node: ReturnStmt):
+            
+    def visit(self, node: ForStmt, env: Symtab): 
+        # 1. Inicializador
+        if node.init:
+            node.init.accept(self, env)
+        
+        while True:
+            # 2. Condición
+            cond_val = True # 'for(;;)' es un bucle infinito
+            if node.cond:
+                cond_val = node.cond.accept(self, env)
+            
+            if not _is_truthy(cond_val):
+                break # Salir del bucle
+
+            # 3. Cuerpo
+            try:
+                for stmt in node.body:
+                    stmt.accept(self, env)
+            except BreakException:
+                break # Salir del 'for'
+            except ContinueException:
+                # 'continue' salta al 'step'
+                pass
+            
+            # 4. Step
+            if node.step:
+                node.step.accept(self, env)
+
+    def visit(self, node: ReturnStmt, env: Symtab):
         value = None
         if node.expr:
-            value = node.expr.accept(self)
+            value = node.expr.accept(self, env)
         raise ReturnException(value)
         
-    def visit(self, node: ExprStmt):
-        # Ejecuta la expresión por sus efectos secundarios, descarta el valor
-        node.expr.accept(self)
+    def visit(self, node: ExprStmt, env: Symtab):
+        node.expr.accept(self , env)
 
-    # =================================================================
-    # Visitantes de Nodos (Expresiones)
-    # =================================================================
     
-    def visit(self, node: BinOper):
-        # print( node.right)
-        left = node.left.accept(self)
-        right = node.right.accept(self)
+    def visit(self, node: BinOper, env: Symtab):
+        
+        # return  self.error(node, "División por cero "+str(node.right.name) + " "  + str(node.lineno));
+        left = node.left.accept(self, env)
+        right = node.right.accept(self, env)
 
         op = node.oper
+
+
         if op == '+':
             # 'add' está sobrecargado para strings
             if isinstance(left, str) and isinstance(right, str):
@@ -384,20 +391,20 @@ class Interpreter(Visitor):
         else:
             raise NotImplementedError(f"Operador binario no implementado: {op}")
 
-    def visit(self, node: LogicalOpExpr):
-        left = node.left.accept(self)
+    def visit(self, node: LogicalOpExpr, env: Symtab):
+        left = node.left.accept(self, env)
         
         if node.oper == '||':
             # Cortocircuito: si 'left' es verdadero, no evaluar 'right'
-            return left if _is_truthy(left) else node.right.accept(self)
+            return left if _is_truthy(left) else node.right.accept(self, env)
         elif node.oper == '&&':
             # Cortocircuito: si 'left' es falso, no evaluar 'right'
-            return node.right.accept(self) if _is_truthy(left) else left
+            return node.right.accept(self, env) if _is_truthy(left) else left
         else:
             raise NotImplementedError(f"Operador lógico no implementado: {node.oper}")
 
-    def visit(self, node: UnaryOper):
-        expr_val = node.expr.accept(self)
+    def visit(self, node: UnaryOper,  env: Symtab):
+        expr_val = node.expr.accept(self, env)
         
         if node.oper == '-':
             self._check_numeric_operand(node, expr_val)
@@ -407,20 +414,23 @@ class Interpreter(Visitor):
         else:
             raise NotImplementedError(f"Operador unario no implementado: {node.oper}")
             
-    def visit(self, node: Assign):
-        rvalue = node.right.accept(self)
+    def visit(self, node: Assign, env: Symtab):
+        rvalue = node.right.accept(self, env)
         lvalue_node = node.left
         
         if isinstance(lvalue_node, Identifier):
             # Asignación a variable: x = ...
-            self._assign(lvalue_node.name, rvalue)
+            env.add(lvalue_node.name, rvalue)
         elif isinstance(lvalue_node, ArrayAccess):
             # Asignación a array: a[i] = ...
-            arr = lvalue_node.array.accept(self)
+            arr = lvalue_node.array.accept(self, env)
             
-            idx = lvalue_node.index.accept(self)
+            idx = lvalue_node.pos.accept(self, env)
+            
             if not isinstance(arr, list):
-                self.error(lvalue_node, "Base de acceso a array no es un array")
+                env.print()
+                print(arr, lvalue_node.array.name, lvalue_node.pos )
+                self.error(lvalue_node, "Base de acceso a array no es un array " + str(lvalue_node.lineno))
             if not isinstance(idx, int):
                 self.error(lvalue_node, "Índice de array no es un entero")
             if idx < 0 or idx >= len(arr):
@@ -431,19 +441,22 @@ class Interpreter(Visitor):
             
         return rvalue # La asignación es una expresión que retorna el rvalue
 
-    def visit(self, node: PreInc):
+  
+   
+        
+    def visit(self, node: PreInc, env: Symtab):
         lvalue_node = node.expr
         
         if isinstance(lvalue_node, Identifier):
             name = lvalue_node.name
-            value = self._lookup(name)
+            value = env.get(name)
             self._check_numeric_operand(node, value)
             value += 1
-            self._assign(name, value)
+            env.add(name, value)
             return value
         elif isinstance(lvalue_node, ArrayAccess):
-            arr = lvalue_node.array.accept(self)
-            idx = lvalue_node.index.accept(self)
+            arr = lvalue_node.array.accept(self, env)
+            idx = lvalue_node.index.accept(self, env)
             # Validaciones de array/índice
             if not isinstance(arr, list): self.error(lvalue_node, "Base no es array")
             if not isinstance(idx, int): self.error(lvalue_node, "Índice no es entero")
@@ -456,19 +469,19 @@ class Interpreter(Visitor):
         else:
             self.error(node, "Operando para '++' debe ser un l-value (variable o acceso a array)")
 
-    def visit(self, node: PreDec):
+    def visit(self, node: PreDec, env: Symtab):
         lvalue_node = node.expr
 
         if isinstance(lvalue_node, Identifier):
             name = lvalue_node.name
-            value = self._lookup(name)
+            value = env.get(name)
             self._check_numeric_operand(node, value)
             value -= 1
-            self._assign(name, value)
+            env.add(name, value)
             return value
         elif isinstance(lvalue_node, ArrayAccess):
-            arr = lvalue_node.array.accept(self)
-            idx = lvalue_node.index.accept(self)
+            arr = lvalue_node.array.accept(self, env)
+            idx = lvalue_node.index.accept(self, env)
             # Validaciones
             if not isinstance(arr, list): self.error(lvalue_node, "Base no es array")
             if not isinstance(idx, int): self.error(lvalue_node, "Índice no es entero")
@@ -481,13 +494,13 @@ class Interpreter(Visitor):
         else:
             self.error(node, "Operando para '--' debe ser un l-value")
 
-    def visit(self, node: Call):
-        callee = node.func.accept(self)
+    def visit(self, node: Call, env: Symtab):
+        callee = node.func.accept(self, env)
         
         if not callable(callee):
             self.error(node, "Intento de llamar a algo que no es una función")
             
-        args = [arg.accept(self) for arg in node.args]
+        args = [arg.accept(self, env) for arg in node.args]
         
         if hasattr(callee, 'arity') and callee.arity != -1:
             if len(args) != callee.arity:
@@ -495,9 +508,9 @@ class Interpreter(Visitor):
         
         return callee(self, *args)
         
-    def visit(self, node: ArrayAccess):
-        arr = node.array.accept(self)
-        idx = node.pos.accept(self)
+    def visit(self, node: ArrayAccess, env: Symtab):
+        arr = node.array.accept(self, env)
+        idx = node.pos.accept(self, env)
         
         if not isinstance(arr, list):
             self.error(node, "Base de acceso a array no es un array")
@@ -508,38 +521,41 @@ class Interpreter(Visitor):
             
         return arr[idx]
 
-    def visit(self, node: Identifier):
-        return self._lookup(node.name)
+    def visit(self, node: Identifier, env: Symtab):
+        # print (node.name)
+        # print (env.get(node.name))
+        return env.get(node.name)
         
     # =================================================================
     # Visitantes de Nodos (Literales)
     # =================================================================
     
-    def visit(self, node: Literal):
+    def visit(self, node: Literal, env: Symtab):
         return node.value
 
-    def visit(self, node: Integer):
+    def visit(self, node: Integer, env: Symtab):
         return node.value
 
-    def visit(self, node: Float):
+    def visit(self, node: Float, env: Symtab):
         return node.value
 
-    def visit(self, node: Boolean):
+    def visit(self, node: Boolean, env: Symtab):
         return node.value
 
-    def visit(self, node: Char):
+    def visit(self, node: Char, env: Symtab):
         return node.value
 
-    def visit(self, node: String):
+    def visit(self, node: String,  env: Symtab):
         return node.value
+    
+    def visit(self, n: SimpleType, env: Symtab):
+        pass
+    
+    def visit(self, node: Param,  env: Symtab):
+        print (node.name, "tipo", node.type, "a")
+        node.type.accept(self, env)
+        env.add(node.name, node)
 
-    # =================================================================
-    # Nodos no visitables (Tipos, etc.)
-    # =================================================================
-    # No implementamos visit() para:
-    # SimpleType, ArrayType, FuncType, Param, IfCond, Declaration
-    # ya que son nodos abstractos o de definición de tipos
-    # que no se ejecutan en runtime.
 
 
 if __name__ == '__main__':
@@ -563,7 +579,6 @@ if __name__ == '__main__':
         print("Asegúrate de que tu parser esté implementado y en el mismo directorio.")
     except Exception as e:
         print(f"[red]Ocurrió un error durante el interprete o la impresión:[/red]")
-        # print(e)
-        # print stack 
-        import traceback
-        print(traceback.format_exc())
+        print(e)
+        # import traceback
+        # print(traceback.format_exc())

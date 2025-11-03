@@ -1,0 +1,8 @@
+
+ main: function void () = {
+    x: integer = 4;
+
+    // Pre Increment
+    ++x;
+    print x;
+ }

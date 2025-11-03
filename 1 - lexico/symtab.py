@@ -70,11 +70,16 @@ class Symtab:
 		o definición de una función, variable (por ejemplo, Declaración
 		o FuncDeclaration)
 		'''
-		if name in self.entries:
-			if self.entries[name].type != value.type:
-				raise Symtab.SymbolConflictError("El simbolo ya existe con un tipo diferente")
-			else:
-				raise Symtab.SymbolDefinedError("El simbolo ya existe")
+		## TODO
+		# if name in self.entries:
+			# if self.entries[name] has not attr type
+			# if not hasattr(self.entries[name], 'type'):
+			# 	raise Symtab.SymbolDefinedError("El simbolo no tiene type " + name)
+
+			# if self.entries[name].type != value.type:
+			# 	raise Symtab.SymbolConflictError("El simbolo ya existe con un tipo diferente " + name)
+			# else:
+			# 	raise Symtab.SymbolDefinedError("El simbolo ya existe")
 		self.entries[name] = value
 		
 	def get(self, name):

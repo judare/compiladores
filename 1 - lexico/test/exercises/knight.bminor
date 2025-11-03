@@ -20,8 +20,8 @@ print_board: function void (board: array [] integer) = {
     r: integer;
     c: integer;
 
-    for (r = 0; r < N; r++) {
-        for (c = 0; c < N; c++) {
+    for (r = 0; r < N; ++r) {
+        for (c = 0; c < N; ++c) {
             if (r % 2 == c % 2) {
                 print board[index(r,c)];
             }
@@ -44,7 +44,7 @@ walk: function boolean (r: integer, c: integer, m: integer, board: array [] inte
         return true;
     }
 
-    for (i = 0; i < array_length(xmoves); i++) {
+    for (i = 0; i < array_length(xmoves); ++i) {
         next_x: integer = r + xmoves[i];
         next_y: integer = c + ymoves[i];
         if (can_move(next_x, next_y, board)) {

@@ -1,0 +1,13 @@
+
+main: function void () = {
+    N: integer = 100;
+    numbers: array [N] integer;
+    i: integer;
+    
+    for (i=0; i < N; i = i + 1) {
+        numbers[i] = i;
+        print numbers[i];
+        print "\n";
+    }
+
+}

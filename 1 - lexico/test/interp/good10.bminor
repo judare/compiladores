@@ -1,0 +1,11 @@
+
+main: function void () = {
+    N: integer = 3;
+    isprime: array [N] boolean;
+
+    isprime[0] = true;
+
+    if (isprime[0]) {
+        print "true";
+    } 
+}

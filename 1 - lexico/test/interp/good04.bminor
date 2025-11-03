@@ -2,10 +2,9 @@
 
 calcular_e: function float () = {
     i: integer;
-    factorial: integer;
+    factorial: integer = 1;
     e: float = 1;
-    factorial = 1;
-    for( i=1; i<10; i = i + 1 ) {
+    for( i=1; i<10; ++i ) {
         factorial = factorial * i;
         e = e +  1.0 / factorial;
     }
