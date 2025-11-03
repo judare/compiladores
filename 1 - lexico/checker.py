@@ -16,11 +16,6 @@ from typesys import typenames, check_binop, check_unaryop, CheckError, lookup_ty
 class Check(Visitor):
     @classmethod
     def checker(cls, n: Program):
-        '''
-        Punto de entrada para la verificación.
-        1. Crear la tabla de símbolos global.
-        2. Visitar todas las declaraciones en n.body.
-        '''
         checker = cls()
         env = Symtab('global')
         for decl in n.body:
@@ -206,6 +201,9 @@ class Check(Visitor):
     # =====================================================================
     def visit(self, n: BinOper, env: Symtab):
         pass
+
+    def visit(self, n: LogicalOpExpr, env: Symtab):
+        pass
         # '''
         # 1. Visitar n.left y n.right para obtener sus tipos.
         # 2. Verificar si n.oper es una operación permitida entre esos tipos.
@@ -310,3 +308,5 @@ if __name__ == '__main__':
         # print stack 
         # import traceback
         # print(traceback.format_exc())
+
+

@@ -12,6 +12,7 @@ def main():
     parser.add_argument('--parse', help='parse a file')
     parser.add_argument('--checker', help='checker a file')
     parser.add_argument('--ast', help='show ast')
+    parser.add_argument('--interp', help='interpreter a file')
     args = parser.parse_args()
 
     if args.scan:
@@ -22,6 +23,8 @@ def main():
         checker(args.checker)
     elif args.ast:
         ast(args.ast)
+    elif args.interp:
+        interpreter(args.interp)
 
 def scan(file):
     cmd = ["python3", './lexer.py', file]
@@ -45,6 +48,16 @@ def parse(file):
 
 def checker(file):
     cmd = ["python3", './checker.py', file]
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8')
+    stdout, stderr = p.communicate()
+    if stderr:
+        print(stderr)
+    else:
+        # print with lines 
+        print(stdout)
+    
+def interpreter(file):
+    cmd = ["python3", './interp.py', file]
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8')
     stdout, stderr = p.communicate()
     if stderr:

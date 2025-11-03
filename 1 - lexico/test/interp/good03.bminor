@@ -1,0 +1,9 @@
+// area triangulo
+
+area: function float ( base: float, altura: float ) = {
+    return (base*altura)/2;
+}
+
+main: function void () = {
+    print area(10,5);
+}

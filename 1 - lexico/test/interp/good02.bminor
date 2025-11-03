@@ -1,0 +1,8 @@
+
+main: function void () = {
+     if (12 < 10) {
+         print "hola";
+     } else {
+         print "mundo";
+     }
+}

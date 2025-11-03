@@ -245,7 +245,7 @@ class Parser(sly.Parser):
 
 	@_("expr2 LOR expr3")
 	def expr2(self, p):
-		return BinOper("||", p.expr2, p.expr3)
+		return LogicalOpExpr("||", p.expr2, p.expr3)
 
 	@_("expr3")
 	def expr2(self, p):
@@ -257,7 +257,7 @@ class Parser(sly.Parser):
 
 	@_("expr3 AND expr4")
 	def expr3(self, p):
-		return BinOper("&&", p.expr3, p.expr4)
+		return LogicalOpExpr("&&", p.expr3, p.expr4)
 
 	@_("expr4")
 	def expr3(self, p):

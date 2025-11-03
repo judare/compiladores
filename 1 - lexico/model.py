@@ -261,6 +261,12 @@ class BinOper(Expression):
     right: Expression
 
 @dataclass
+class LogicalOpExpr(Expression):
+    oper : str
+    left : Expression
+    right: Expression
+
+@dataclass
 class UnaryOper(Expression):
     oper : str
     expr : Expression
