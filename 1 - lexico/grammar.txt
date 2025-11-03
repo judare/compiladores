@@ -109,8 +109,8 @@ Rule 104   empty -> <empty>
 Unused terminals:
 
     OR
-    AUTO
     NOT
+    AUTO
 
 Terminals, with rules where they appear:
 

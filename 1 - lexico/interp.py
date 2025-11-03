@@ -498,7 +498,7 @@ class Interpreter(Visitor):
         callee = node.func.accept(self, env)
         
         if not callable(callee):
-            self.error(node, "Intento de llamar a algo que no es una función")
+            self.error(node, "Intento de llamar a algo que no es una función " + str(node.func.name))
             
         args = [arg.accept(self, env) for arg in node.args]
         
