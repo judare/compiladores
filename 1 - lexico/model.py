@@ -1,13 +1,13 @@
 # model.py
 
 from dataclasses import dataclass, field
-from multimethod import multimeta
+# from multimethod import multimeta
 from typing      import List, Union
 
 # =====================================================================
 # Clases Abstractas
 # =====================================================================
-class Visitor(metaclass=multimeta):
+class Visitor:
     pass
 
 @dataclass

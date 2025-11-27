@@ -5,6 +5,6 @@ area: function float ( base: float, altura: float ) = {
 }
 
 main: function void () = {
-    print area(10,5);
+    print area(10.0, 5.0);
 }
 

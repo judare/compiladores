@@ -195,55 +195,67 @@ class Interpreter(Visitor):
         func = Function(n, func_env)
         env.add(n.name, func)
 
-    def visit(self, node: VarDecl, env: Symtab):
-        value = None # Valor por defecto
-
-        # Comprobar si es una declaración de array
-        if isinstance(node.type, ArrayType):
-            if node.type.size:
-                # Es un array con tamaño, ej: array [N] boolean
-                size_val = node.type.size.accept(self, env)
+  def visit_VarDecl(self, n: VarDecl):
+        # --- ARRAY ---
+        if isinstance(n.type, ArrayType):
+            elem_type = self._get_llvm_type(n.type.elem_type.name)
+            # Tamaño del array
+            size = 10
+            if hasattr(n.type.size, 'value'):
+                 size = int(n.type.size.value)
+            
+            array_type = ir.ArrayType(elem_type, size)
+            
+            if len(self.scopes) == 1: # Global
+                gvar = ir.GlobalVariable(self.module, array_type, n.name)
+                # Las globales requieren inicializadores constantes complejos
+                # Aquí usamos ZeroInitializer por simplicidad si no es trivial
+                gvar.initializer = ir.Constant(array_type, [ir.Constant(elem_type, 0)] * size)
+                self.add_symbol(n.name, gvar)
+            else: # Local
+                ptr = self.builder.alloca(array_type, name=n.name)
+                self.add_symbol(n.name, ptr)
                 
-                if not isinstance(size_val, int):
-                    self.error(node, f"Tamaño del array '{node.name}' no es un entero (es {type(size_val).__name__})")
-                if size_val < 0:
-                    self.error(node, f"Tamaño del array '{node.name}' no puede ser negativo ({size_val})")
+                # === CORRECCIÓN ERROR DE ARRAYS ===
+                # Si hay valores iniciales {1, 2, ...}, hay que guardarlos uno a uno
+                if n.value and isinstance(n.value, list):
+                    zero = ir.Constant(int_type, 0)
+                    for i, expr in enumerate(n.value):
+                        # 1. Calcular valor
+                        val = expr.accept(self)
+                        # Cast si es necesario
+                        if elem_type == int_type and val.type == bool_type:
+                            val = self.builder.zext(val, int_type)
+                        
+                        # 2. Calcular índice constante
+                        index = ir.Constant(int_type, i)
+                        
+                        # 3. Obtener puntero al elemento i: GEP(ptr, 0, i)
+                        elem_ptr = self.builder.gep(ptr, [zero, index], inbounds=True)
+                        
+                        # 4. Guardar
+                        self.builder.store(val, elem_ptr)
 
-                # Determinar el valor por defecto para los elementos
-                default_elem_val = None
-                
-                # Necesitamos encontrar el tipo base (puede ser un array de arrays)
-                elem_type = node.type.elem_type
-                while isinstance(elem_type, ArrayType):
-                     elem_type = elem_type.elem_type
+        # --- VARIABLE SIMPLE ---
+        else:
+            var_type = self._get_llvm_type(n.type.name)
+            init_val = ir.Constant(var_type, 0)
+            if var_type == float_type: init_val = ir.Constant(float_type, 0.0)
 
-                if isinstance(elem_type, SimpleType):
-                    if elem_type.name == 'integer':
-                        default_elem_val = 0
-                    elif elem_type.name == 'float':
-                        default_elem_val = 0.0
-                    elif elem_type.name == 'boolean':
-                        default_elem_val = False # <-- El valor clave para 'isprime'
-                    elif elem_type.name == 'string':
-                        default_elem_val = ""
-                    elif elem_type.name == 'char':
-                        default_elem_val = '\0' 
-                
-                # Asignar una nueva lista (el array) con los valores por defecto
-                value = [default_elem_val] * size_val
+            if len(self.scopes) == 1: 
+                gvar = ir.GlobalVariable(self.module, var_type, n.name)
+                gvar.initializer = init_val 
+                self.add_symbol(n.name, gvar)
             else:
-                # Es un array sin tamaño (ej: 'array [] boolean' en un parámetro)
-                value = None
-        
-        # Opcional: Asignar valores por defecto a tipos simples también
-        elif isinstance(node.type, SimpleType):
-            if node.type.name == 'integer': value = 0
-            elif node.type.name == 'float': value = 0.0
-            elif node.type.name == 'boolean': value = False
-            elif node.type.name == 'string': value = ""
-            elif node.type.name == 'char': value = '\0'
-
-        env.add(node.name, value)
+                ptr = self.builder.alloca(var_type, name=n.name)
+                if n.value:
+                    val = n.value.accept(self)
+                    if val.type == bool_type and var_type == int_type:
+                        val = self.builder.zext(val, int_type)
+                    self.builder.store(val, ptr)
+                else:
+                    self.builder.store(init_val, ptr)
+                self.add_symbol(n.name, ptr)
 
     def visit(self, node: VarDeclInit, env: Symtab):
         # Declaración con inicializador (potencialmente lista para array)

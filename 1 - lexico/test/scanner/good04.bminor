@@ -12,3 +12,4 @@ sum: function integer ( n: integer ) = {
 main: function void () = {
     print(sum(10));
 }
+
